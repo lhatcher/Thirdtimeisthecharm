@@ -25,5 +25,8 @@ module.exports = {
       chunkModules : true,
       colors       : true
     }
-  })
+  }),
+
+  apiHost: 'localhost',
+  apiPort: 3001
 }

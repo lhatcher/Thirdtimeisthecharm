@@ -7,6 +7,34 @@ const config = require('../config')
 const app = express()
 const paths = config.utils_paths
 
+const http = require('http');
+const httpProxy = require('http-proxy');
+const server = new http.Server(app);
+const targetUrl = `http://${config.apiHost}:${config.apiPort}`;
+const proxy = httpProxy.createProxyServer({
+  target: targetUrl,
+  ws: true,
+});
+
+app.use('/api', (req, res) => {
+  proxy.web(req, res, { target: `${targetUrl}/api` });
+});
+
+server.on('upgrade', (req, socket, head) => {
+  proxy.ws(req, socket, head);
+});
+
+proxy.on('error', (error, req, res) => {
+  if (error.code !== 'ECONNRESET') {
+    console.error('proxy error', error);
+  }
+  if (!res.headersSent) {
+    res.writeHead(500, { 'content-type': 'application/json' });
+  }
+  const json = { error: 'proxy_error', reason: error.message };
+  res.end(JSON.stringify(json));
+});
+
 // This rewrites all routes requests to the root /index.html file
 // (ignoring file requests). If you want to implement universal
 // rendering, you'll want to remove this middleware.
