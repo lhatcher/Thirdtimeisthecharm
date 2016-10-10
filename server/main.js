@@ -7,33 +7,35 @@ const config = require('../config')
 const app = express()
 const paths = config.utils_paths
 
-const http = require('http');
-const httpProxy = require('http-proxy');
-const server = new http.Server(app);
+// const http = require('http');
+// const httpProxy = require('http-proxy');
+// const server = new http.Server(app);
+const proxy = require('http-proxy-middleware');
 const targetUrl = `http://${config.apiHost}:${config.apiPort}`;
-const proxy = httpProxy.createProxyServer({
-  target: targetUrl,
-  ws: true,
-});
+app.use('/api', proxy({target: 'http://localhost:3001'}))
+// const proxy = httpProxy.createProxyServer({
+//   target: targetUrl,
+//   ws: true,
+// });
 
-app.use('/api', (req, res) => {
-  proxy.web(req, res, { target: `${targetUrl}/api` });
-});
+// app.use('/api', (req, res) => {
+//   proxy.web(req, res, { target: `${targetUrl}/api` });
+// });
 
-server.on('upgrade', (req, socket, head) => {
-  proxy.ws(req, socket, head);
-});
+// server.on('upgrade', (req, socket, head) => {
+//   proxy.ws(req, socket, head);
+// });
 
-proxy.on('error', (error, req, res) => {
-  if (error.code !== 'ECONNRESET') {
-    console.error('proxy error', error);
-  }
-  if (!res.headersSent) {
-    res.writeHead(500, { 'content-type': 'application/json' });
-  }
-  const json = { error: 'proxy_error', reason: error.message };
-  res.end(JSON.stringify(json));
-});
+// proxy.on('error', (error, req, res) => {
+//   if (error.code !== 'ECONNRESET') {
+//     console.error('proxy error', error);
+//   }
+//   if (!res.headersSent) {
+//     res.writeHead(500, { 'content-type': 'application/json' });
+//   }
+//   const json = { error: 'proxy_error', reason: error.message };
+//   res.end(JSON.stringify(json));
+// });
 
 // This rewrites all routes requests to the root /index.html file
 // (ignoring file requests). If you want to implement universal
@@ -49,7 +51,8 @@ if (config.env === 'development') {
   debug('Enable webpack dev and HMR middleware')
   app.use(require('webpack-dev-middleware')(compiler, {
     publicPath  : webpackConfig.output.publicPath,
-    contentBase : paths.client(),
+    // contentBase : paths.client(),
+    contentBase : 'http://localhost:3001',
     hot         : true,
     quiet       : config.compiler_quiet,
     noInfo      : config.compiler_quiet,

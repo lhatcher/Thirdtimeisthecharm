@@ -13,15 +13,15 @@
     "lint": "eslint bin build config server src tests",
     "lint:fix": "npm run lint -- --fix",
     "start": "better-npm-run start",
+    "app": "concurrently --kill-others \"npm run dev\" \"npm run api\"",
+    "api": "nodemon server/api",
     "dev": "better-npm-run dev",
     "test": "better-npm-run test",
     "test:dev": "npm run test -- --watch",
     "deploy": "better-npm-run deploy",
     "deploy:dev": "better-npm-run deploy:dev",
     "deploy:prod": "better-npm-run deploy:prod",
-    "codecov": "cat coverage/*/lcov.info | codecov",
-    "api": "better-npm-run start-api",
-    "server": "better-npm-run start-server"
+    "codecov": "cat coverage/*/lcov.info | codecov"
   },
   "betterScripts": {
     "compile": {
@@ -30,22 +30,8 @@
         "DEBUG": "app:*"
       }
     },
-    "start-api": {
-      "command": "nodemon server/api",
-      "env": {
-        "NODE_ENV": "development",
-        "DEBUG": "app:*"
-      }
-    },
-    "start-server": {
-      "command": "nodemon bin/server --ignore dist --ignore coverage --ignore tests --ignore src",
-      "env": {
-        "NODE_ENV": "development",
-        "DEBUG": "app:*"
-      }
-    },
     "dev": {
-      "command": "npm run api && npm run server",
+      "command": "nodemon bin/server --ignore dist --ignore coverage --ignore tests --ignore src",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*"
@@ -146,6 +132,7 @@
     "eslint-plugin-react": "^6.0.0",
     "eslint-plugin-standard": "^2.0.0",
     "express": "^4.14.0",
+    "http-proxy-middleware": "^0.17.2",
     "karma": "^1.0.0",
     "karma-coverage": "^1.0.0",
     "karma-mocha": "^1.0.1",
